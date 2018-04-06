@@ -25,15 +25,16 @@ except ImportError:
     raise
 
 # Owner / Repository -> Friendly name
-repos = {
+known_repos = {
     ('mozilla', 'kuma'): 'Kuma',
     ('mdn', 'interactive-examples'): 'Interactive Examples',
     ('mdn', 'kumascript'): 'KumaScript',
     ('mdn', 'browser-compat-data'): 'BCD',
     ('mdn', 'doc-linter-webextension'): 'Doc Linter WebExtension',
     ('mdn', 'data'): 'Data',
-    ('mozmeao', 'infra'): 'Infra'
+    # ('mozmeao', 'infra'): 'Infra'
 }
+known_orgs = ('mdn',)
 
 post_author = 'John Whitlock'
 
@@ -122,11 +123,12 @@ def get_changelog(client_id, client_secret):
         next_month += timedelta(days=1)
     last_day = next_month - timedelta(days=1)
 
+    repos = gather_repos(known_orgs, known_repos, client_id, client_secret)
     pr_data = get_pr_data(repos.keys(), client_id, client_secret)
     user_data = get_user_data(pr_data, client_id, client_secret)
     pr_counts_text, pr_counts = get_pr_counts(pr_data, month, last_day)
     pr_first_entries, new_users, new_prs, pr_other_entries = get_pr_details(
-        pr_data, user_data, month, last_day, pr_counts)
+        pr_data, user_data, repos, month, last_day, pr_counts)
 
     params = {
         'month': month.strftime('%B'),
@@ -160,6 +162,46 @@ def pick_month():
         while month.day != 1:
             month -= timedelta(days=1)
     return month
+
+
+def gather_repos(known_orgs, known_repos, client_id, client_secret):
+    """Gather the current repositories."""
+    repos = known_repos.copy()
+    url_pat = 'https://api.github.com/users/%(owner)s/repos'
+    payload = {
+        'client_id': client_id,
+        'client_secret': client_secret,
+    }
+    for org in known_orgs:
+        next_url = None
+        first = True
+        is_last = False
+        resp = requests.get(url_pat % {'owner': org}, params=payload)
+        while not is_last:
+            # Request next_url if this is not the first request
+            if first:
+                first = False
+            else:
+                resp = requests.get(next_url)
+            print(resp.url, file=sys.stderr)
+
+            # Abort if the return is an error
+            out = resp.json()
+            if 'message' in out:
+                pprint.pprint(out, file=sys.stderr)
+                raise Exception(resp.text)
+
+            # Process the repositories
+            for repo in resp.json():
+                key = (org, repo['name'])
+                if key not in repos:
+                    repos[key] = repo['name']
+
+            # Process the links and get the next URL
+            links = get_links(resp.headers.get('Link', ''))
+            next_url = links.get('next')
+            is_last = next_url is None
+    return repos
 
 
 def get_pr_data(repos, client_id, client_secret):
@@ -233,7 +275,7 @@ def get_pr_data_for_repo(owner, repo, client_id, client_secret):
                 prs.append((owner, repo, pr_obj.number, pr_obj))
 
         # Process the links and get the next URL
-        links = get_links(resp.headers['Link'])
+        links = get_links(resp.headers.get('Link', ''))
         next_url = links.get('next')
         is_last = next_url is None
 
@@ -415,7 +457,7 @@ remaining_prs_template = (
     "+author:%(username)s)\n")
 
 
-def get_pr_details(pr_data, user_data, start, end, counts):
+def get_pr_details(pr_data, user_data, repos, start, end, counts):
     """Create summaries of the PRs merged."""
     pr_firsts = defaultdict(OrderedDict)  # Entries for first-time contributors
     pr_other_entries = []  # Entries for existing contributors
@@ -476,7 +518,7 @@ def get_pr_details(pr_data, user_data, start, end, counts):
                         'end': end.isoformat()
                     })
                     entry.update({
-                        'multi_entries': ' '.join(multi_entries[:2]),
+                        'multi_entries': '  '.join(multi_entries[:2]),
                         'multi_last_entry': remaining_prs_template % remaining
                     })
                 if entry['is_new_to_any']:
