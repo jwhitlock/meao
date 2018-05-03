@@ -44,8 +44,10 @@ template = """\
 layout: post
 title: MDN Changelog for %(month)s %(year)d
 author: %(post_author)s
-excerpt_separator: <!--more-->
 ---
+
+Done in %(month)s
+===
 
 Here's what happened in %(month)s to the
 [code, data, and tools](https://github.com/mdn/)
@@ -65,11 +67,6 @@ Here's the plan for %(next_month)s:
 - [Plan 1](#plan1-%(month_id_suffix)s)
 - [Plan 2](#plan2-%(month_id_suffix)s)
 - [Plan 3](#plan3-%(month_id_suffix)s)
-
-<!--more-->
-
-Done in %(month)s
-===
 
 <a name="item1-%(month_id_suffix)s">Item 1</a>
 ---
