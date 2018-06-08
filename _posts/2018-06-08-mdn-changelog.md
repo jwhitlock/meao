@@ -209,7 +209,7 @@ to get these and the other examples on MDN.
 
 ![map](
  {{ site.baseurl }}/public/images/kuma/2018-05-map.png
- "A demo of the polygon targets for <map>"")
+ "A demo of the polygon targets for <map>")
 
 <a name="tweaks-may-18">Shipped Tweaks and Fixes</a>
 ---
