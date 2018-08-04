@@ -1,327 +1,334 @@
 ---
 layout: post
-title: MDN Changelog for June 2018
+title: MDN Changelog for July 2018
 author: John Whitlock
 ---
 
-Done in June
+Done in July
 ===
 
-Here's what happened in June to the
+Here's what happened in July to the
 [code, data, and tools](https://github.com/mdn/)
 that support
 [MDN Web Docs](https://developer.mozilla.org):
 
-- [Shipped 100+ HTML Interactive Examples](#html-ie-jun-18)
-- [Shipped Django 1.11](#dj11-jun-18)
-- [Shipped tweaks and fixes](#tweaks-jun-18)
-  by merging 252 pull requests,
-  including 32 pull requests
-  from 26 new contributors.
+- [Experimented with the CDN](#cdn-jul-18)
+- [Decommissioned zones](#zones-jul-18)
+- [Converted compatibility data](#bcd-jul-18)
+- [Shipped tweaks and fixes](#tweaks-jul-18)
+  by merging 307 pull requests,
+  including 58 pull requests
+  from 43 new contributors.
 
-Here's the plan for July:
+Here's the plan for August:
 
-- [Decommission Zones](#zones-jun-18)
-- [Focus on Performance](#performance-jun-18)
+- [Upgrade to ElasticSearch 5.6](#es-jul-18)
 
-<a name="html-ie-jun-18">Shipped 100+ HTML Interactive Examples</a>
+<a name="item2-jul-18">Experimented with the CDN</a>
 ---
-In June, we shipped over 100 HTML interactive examples, adding quick
-references and playgrounds for our HTML element documentation.
+- Change cache TTL from 5min to 48hr
+  ([Kuma PR 4876](https://github.com/mozilla/kuma/pull/4876)),
+  from
+  [Ryan Johnson](https://github.com/escattone).
 
-![figcaption](
- {{ site.baseurl }}/public/images/kuma/2018-07-figcaption.png
- "The figcaption interactive example.")
+Other performance stuff:
 
-[Schalk Neethling](https://github.com/schalkneethling) fixed the remaining
-blockers, such as applying an `output` class as a style target
-([PR 961](https://github.com/mdn/interactive-examples/pull/961)),
-and adding some additional size options
-([PR 962](https://github.com/mdn/interactive-examples/pull/962)).
-[wbamberg](https://github.com/wbamberg) wrote instructions for adding the
-examples to MDN, and [SphinxKnight](https://github.com/SphinxKnight) and
-[Irene Smith](https://github.com/irenesmith) pitched in to deploy them in
-less than 24 hours. MDN visitors have fun, informative examples on JS, CSS,
-and now HTML reference pages.
+- Inline dnt-helper
+  ([Kuma PR 4881](https://github.com/mozilla/kuma/pull/4881)),
+  from
+  [Schalk Neethling](https://github.com/schalkneethling).
+- Add Jinja helper for SVG
+  ([Kuma PR 4860](https://github.com/mozilla/kuma/pull/4860)),
+  from
+  [Schalk Neethling](https://github.com/schalkneethling).
 
-Irene Smith joined the MDN writer's team this month as a Firefox Developer
-Content Manager. She started work right away, including helping with this
-project. Welcome to the team, Irene!
-
-<a name="dj11-jun-18">Shipped Django 1.11</a>
+<a name="zones-jul-18">Decommissioned zones</a>
 ---
-We deployed Django 1.11 on June 6th. There are no visible changes, but also
-no errors for MDN visitors. Sometimes a engineering project is successful if
-you just get back to where you started.
+We disabled zones on TKTK. They are gone. There is a little more to do.
 
-![falcon-heavy](
- {{ site.baseurl }}/public/images/kuma/2018-07-falcon-heavy.jpg
- "Like the Falcon Rocket, MDN took a long journey to return where we started.")
+- Death of zones
+  ([Kuma PR 4853](https://github.com/mozilla/kuma/pull/4853)),
+  from
+  [Ryan Johnson](https://github.com/escattone).
 
-We did most of the
-[preparation work](https://hacks.mozilla.org/2018/06/media-mathml-and-django-1-11-mdn-changelog-for-may-2018/#django-1-11-may-18)
-in development environments. On June 1st, we shipped Django 1.11 to our
-staging environment
-([PR 4830](https://github.com/mozilla/kuma/pull/4830)). This exposed a few
-issues that were quick to fix, such as the logging configuration
-([PR 4831](https://github.com/mozilla/kuma/pull/4831)) and client-side
-translation catalogs ([PR 4831](https://github.com/mozilla/kuma/pull/4831)).
-Tests in the production-like staging environment ensured the last bugs
-were fixed before MDN's visitors saw them.
-
-We're looking ahead to the next framework update.  Django 1.11 is the last to
-support Python 2.7, so we'll need to switch to
-[Python 3.6](https://docs.python.org/3/whatsnew/3.6.html#whatsnew36-pep498).
-We've added a
-[Python 3 build to TravisCI](https://travis-ci.org/mozilla/kuma),
-and will ratchet up compatibility over time.
-([PR 4848](https://github.com/mozilla/kuma/pull/4848)).
-[Anthony Maton](https://github.com/MatonAnthony) started the Python 3 changes
-at the Mozilla All-Hands, updating tests to expect random dictionary order,
-[a security feature enabled in Python 3.3](https://stackoverflow.com/a/14959001/10612)
-([PR 4851](https://github.com/mozilla/kuma/pull/4851)). We expect many more
-changes, and we plan to switch to Python 3 with Django 1.11 by the end of the
-year.
-
-The next Django Long-Term Support (LTS) release will be 2.2,
-[scheduled for April 2019](https://www.djangoproject.com/download/#supported-versions).
-The work will be similar to the last upgrade, updating the code to be
-compatible with Django 1.11 through 2.2.
-[Ryan Johnson](https://github.com/escattone) started the process by converting
-to the
-[new-style middleware](https://docs.djangoproject.com/en/1.11/topics/http/middleware/),
-required in 2.0
-([PR 4841](https://github.com/mozilla/kuma/pull/4841)). We plan a smooth
-switch to Django 2.2 by June 2019.
-
-<a name="tweaks-jun-18">Shipped Tweaks and Fixes</a>
+<a name="bcd-jul-18">Converted compatibility data</a>
 ---
-There were 252 PRs merged in June:
+In July of last year, the BCD project hit the milestone of over 1000 MDN pages
+using the new compatibility data, with about 4900 to convert. This month, there
+are less than 850 pages left to convert, and over 5000 MDN pages are using the
+new data. The steady work of the BCD team has made a huge impact on MDN and the
+community.
 
-- [133 mdn/browser-compat-data PRs](https://github.com/mdn/browser-compat-data/pulls?page=1&utf8=✓&q=is:pr+is:closed+merged:"2018-06-01..2018-06-30")
-- [45 mdn/interactive-examples PRs](https://github.com/mdn/interactive-examples/pulls?page=1&utf8=✓&q=is:pr+is:closed+merged:"2018-06-01..2018-06-30")
-- [39 mozilla/kuma PRs](https://github.com/mozilla/kuma/pulls?page=1&utf8=✓&q=is:pr+is:closed+merged:"2018-06-01..2018-06-30")
-- [12 mdn/kumascript PRs](https://github.com/mdn/kumascript/pulls?page=1&utf8=✓&q=is:pr+is:closed+merged:"2018-06-01..2018-06-30")
-- [10 mdn/bob PRs](https://github.com/mdn/bob/pulls?page=1&utf8=✓&q=is:pr+is:closed+merged:"2018-06-01..2018-06-30")
-- [7 mdn/infra PRs](https://github.com/mdn/infra/pulls?page=1&utf8=✓&q=is:pr+is:closed+merged:"2018-06-01..2018-06-30")
-- [4 mdn/data PRs](https://github.com/mdn/data/pulls?page=1&utf8=✓&q=is:pr+is:closed+merged:"2018-06-01..2018-06-30")
-- [1 mdn/learning-area PR](https://github.com/mdn/learning-area/pulls?page=1&utf8=✓&q=is:pr+is:closed+merged:"2018-06-01..2018-06-30")
-- [1 mdn/webextensions-examples PR](https://github.com/mdn/webextensions-examples/pulls?page=1&utf8=✓&q=is:pr+is:closed+merged:"2018-06-01..2018-06-30")
+Visual Studio Code
+[improved the accuracy of their Browser Compatibility Data](https://code.visualstudio.com/updates/v1_25#_improved-accuracy-of-browser-compatibility-data)
+by adopting the BCD project in the June 2018 release. This was proposed by
+[Pine](https://github.com/octref) in
+[vscode-css-languageservice issue #102](https://github.com/Microsoft/vscode-css-languageservice/issues/102)
+and implemented in
+[PR #105](https://github.com/Microsoft/vscode-css-languageservice/pull/105),
+with feedback from BCD and mdn/data regular
+[Connor Shea](https://github.com/connorshea).
 
-32 of these were from first-time contributors:
+![vscode](
+ {{ site.baseurl }}/public/images/kuma/2018-08-vscode.png
+ "BCD data in VS Code, from the Visual Studio Code update notes")
 
-- Fix compat data for `let` in Chrome
-  ([BCD PR 1632](https://github.com/mdn/browser-compat-data/pull/1632)),
+After a long discussion, the BCD project has updated the policy for
+Node.js versions numbers
+([PR 2196](https://github.com/mdn/browser-compat-data/pull/2196),
+[PR 2294](https://github.com/mdn/browser-compat-data/pull/2294),
+and others). At first, browser-style version numbers were used, such as
+"4", "6", and "8", but the Node.js community requested "4.0.0",
+"6.0.0", and "8.0.0", to more closely reflect how they think of
+release numbers. This was a wide ranging change that unstuck several
+Node.js pull requests.
+
+[Florian Scholz](https://github.com/Elchi3) went on vacation, and
+[Daniel D. Beck](https://github.com/ddbeck) took the lead on project
+maintenance, including shipping the npm package
+(documented in
+[PR 2480](https://github.com/mdn/browser-compat-data/pull/2480)).
+Most of the
+[PRs from the Paris Hack on MDN event](https://github.com/mdn/browser-compat-data/pulls?utf8=%E2%9C%93&q=is%3Apr+label%3A%22HackOnMDNParis2018+%3Afr%3A%22+)
+are now merged or closed, and the project is down to 120 open PRs,
+representing about half of the remaining conversion work.
+
+<a name="tweaks-jul-18">Shipped Tweaks and Fixes</a>
+---
+There were 307 PRs merged in July:
+
+- [197 mdn/browser-compat-data PRs](https://github.com/mdn/browser-compat-data/pulls?page=1&utf8=✓&q=is:pr+is:closed+merged:"2018-07-01..2018-07-31")
+- [48 mdn/interactive-examples PRs](https://github.com/mdn/interactive-examples/pulls?page=1&utf8=✓&q=is:pr+is:closed+merged:"2018-07-01..2018-07-31")
+- [26 mozilla/kuma PRs](https://github.com/mozilla/kuma/pulls?page=1&utf8=✓&q=is:pr+is:closed+merged:"2018-07-01..2018-07-31")
+- [13 mdn/kumascript PRs](https://github.com/mdn/kumascript/pulls?page=1&utf8=✓&q=is:pr+is:closed+merged:"2018-07-01..2018-07-31")
+- [6 mdn/bob PRs](https://github.com/mdn/bob/pulls?page=1&utf8=✓&q=is:pr+is:closed+merged:"2018-07-01..2018-07-31")
+- [5 mdn/infra PRs](https://github.com/mdn/infra/pulls?page=1&utf8=✓&q=is:pr+is:closed+merged:"2018-07-01..2018-07-31")
+- [4 mdn/learning-area PRs](https://github.com/mdn/learning-area/pulls?page=1&utf8=✓&q=is:pr+is:closed+merged:"2018-07-01..2018-07-31")
+- [1 mdn/learning-area-pt-br PR](https://github.com/mdn/learning-area-pt-br/pulls?page=1&utf8=✓&q=is:pr+is:closed+merged:"2018-07-01..2018-07-31")
+- [1 mdn/dom-examples PR](https://github.com/mdn/dom-examples/pulls?page=1&utf8=✓&q=is:pr+is:closed+merged:"2018-07-01..2018-07-31")
+- [1 mdn/voice-change-o-matic PR](https://github.com/mdn/voice-change-o-matic/pulls?page=1&utf8=✓&q=is:pr+is:closed+merged:"2018-07-01..2018-07-31")
+- [1 mdn/web-components-examples PR](https://github.com/mdn/web-components-examples/pulls?page=1&utf8=✓&q=is:pr+is:closed+merged:"2018-07-01..2018-07-31")
+- [1 mdn/webextensions-examples PR](https://github.com/mdn/webextensions-examples/pulls?page=1&utf8=✓&q=is:pr+is:closed+merged:"2018-07-01..2018-07-31")
+- [1 mdn/doc-linter-webextension PR](https://github.com/mdn/doc-linter-webextension/pulls?page=1&utf8=✓&q=is:pr+is:closed+merged:"2018-07-01..2018-07-31")
+- [1 mdn/data PR](https://github.com/mdn/data/pulls?page=1&utf8=✓&q=is:pr+is:closed+merged:"2018-07-01..2018-07-31")
+- [1 mdn/web-speech-api PR](https://github.com/mdn/web-speech-api/pulls?page=1&utf8=✓&q=is:pr+is:closed+merged:"2018-07-01..2018-07-31")
+
+58 of these were from first-time contributors:
+
+- Correct node support for spread (`...`) in object literals
+  ([BCD PR 2189](https://github.com/mdn/browser-compat-data/pull/2189)),
   from
-  [zx](https://github.com/genezx).
-- Update Function.json
-  ([BCD PR 1988](https://github.com/mdn/browser-compat-data/pull/1988)),
+  [Tobias](https://github.com/m4staka).
+- Add NodeJS versions for some features
+  ([BCD PR 2196](https://github.com/mdn/browser-compat-data/pull/2196)),
   from
-  [Jack Giffin](https://github.com/anonyco).
-- Add compat data for `Window` sub features from A to F
-  ([BCD PR 2109](https://github.com/mdn/browser-compat-data/pull/2109)),
-  from
-  [Keshav Mesta](https://github.com/keshavmesta).
-- Add compat data for CSS type `timing-function`
-  ([BCD PR 2183](https://github.com/mdn/browser-compat-data/pull/2183)),
-  from
-  [Pavel](https://github.com/severn101).
-- Update `replaceTrack` API support version
-  ([BCD PR 2205](https://github.com/mdn/browser-compat-data/pull/2205)),
-  from
-  [Xin](https://github.com/betimer).
-- Add safari compatibility for exponentiation operator `**`
-  ([PR 2212](https://github.com/mdn/browser-compat-data/pull/2212)),
-  from
-  [schlagi123](https://github.com/schlagi123)
-  (first contribution to BCD).
-- `aspect-ratio` supported in Chrome
-  ([BCD PR 2224](https://github.com/mdn/browser-compat-data/pull/2224)),
-  from
-  [Filip Chalupa](https://github.com/Onset).
-- Update Edge 17 ParentNode/ChildNode API support
-  ([PR 2280](https://github.com/mdn/browser-compat-data/pull/2280)),
-  from
-  [Jonathan Neal](https://github.com/jonathantneal)
-  (first contribution to BCD).
-- Add safari compatibility for `navigator.sendBeacon`
-  ([BCD PR 2281](https://github.com/mdn/browser-compat-data/pull/2281)),
-  from
-  [Eran Shabi](https://github.com/eranshabi).
-- Add `Response`.{`error`, `redirect`} for Edge/Safari
-  ([BCD PR 2285](https://github.com/mdn/browser-compat-data/pull/2285)),
-  from
-  [James Browning](https://github.com/Jamesernator).
-- Update compat for `HTMLMediaElement.captureStream()`
-  ([BCD PR 2295](https://github.com/mdn/browser-compat-data/pull/2295)),
-  from
-  [Jakub Knoz](https://github.com/CaptainJKoB).
-- Add a description for `javascript.builtins.Promise.Promise`
-  ([PR 2303](https://github.com/mdn/browser-compat-data/pull/2303)),
-  from
-  [kenju](https://github.com/kenju)
-  (first contribution to BCD).
-- Updated NodeList apis for Edge
-  ([BCD PR 2325](https://github.com/mdn/browser-compat-data/pull/2325)),
-  from
-  [Richard Eames](https://github.com/Naddiseo).
-- Update grammar.json
-  ([PR 2328](https://github.com/mdn/browser-compat-data/pull/2328)),
+  [Solant](https://github.com/Solant).
+- Update JavaScript spread operator (`...`) for Node.js
+  ([PR 2262](https://github.com/mdn/browser-compat-data/pull/2262)),
+  Update Node.js versions
+  ([PR 2294](https://github.com/mdn/browser-compat-data/pull/2294)),
   and
-  Update TypedArray.json
-  ([PR 2331](https://github.com/mdn/browser-compat-data/pull/2331)),
+  [9 more PRs](https://github.com/mdn/browser-compat-data/pulls?page=1&utf8=✓&q=is:pr+is:closed+merged:"2018-07-01..2018-07-31"+author:jcsahnwaldt)
   to BCD from
-  [Peppesterest](https://github.com/The-Peppester).
-- Add `externally_connectable`
-  ([BCD PR 2329](https://github.com/mdn/browser-compat-data/pull/2329)),
-  from
-  [Anatoli Babenia](https://github.com/abitrolly).
-- Add note about partial support for `Path2D` constructor in Edge
-  ([BCD PR 2343](https://github.com/mdn/browser-compat-data/pull/2343)),
-  from
-  [hn3000](https://github.com/hn3000).
-- Added support information for `tab_background_separator`
-  ([PR 2349](https://github.com/mdn/browser-compat-data/pull/2349)),
+  [Christopher Sahnwaldt](https://github.com/jcsahnwaldt).
+- Add browser compatibility table for `<input type="checkbox">`
+  ([PR 2383](https://github.com/mdn/browser-compat-data/pull/2383)),
+  Add browser compatibility table for `<input type="button">`
+  ([PR 2384](https://github.com/mdn/browser-compat-data/pull/2384)),
   and
-  `isPointInStroke`
-  ([PR 2375](https://github.com/mdn/browser-compat-data/pull/2375)),
+  Add browser compatibility table for `<input type="search">`
+  ([PR 2385](https://github.com/mdn/browser-compat-data/pull/2385)),
   to BCD from
-  [Irene Smith](https://github.com/irenesmith).
-- Safari has more `FormData` support now
-  ([PR 2376](https://github.com/mdn/browser-compat-data/pull/2376)),
+  [varun singh](https://github.com/varun07).
+- Add missing entity ampersands in description.
+  ([BCD PR 2397](https://github.com/mdn/browser-compat-data/pull/2397)),
   from
-  [Jimmy Wärting](https://github.com/jimmywarting)
-  (first contribution to BCD).
-- Correct "expected output" mistake
-  ([Interactive Examples PR 1000](https://github.com/mdn/interactive-examples/pull/1000)),
+  [epistemex](https://github.com/epistemex).
+- Add `DOMStringMap`
+  ([BCD PR 2401](https://github.com/mdn/browser-compat-data/pull/2401)),
   from
-  [Arkangus](https://github.com/Arkangus).
-- Add a name to the provided address
-  ([Interactive Examples PR 1004](https://github.com/mdn/interactive-examples/pull/1004)),
+  [Ayush Poddar](https://github.com/Mr-Magnificent).
+- Add Edge support for `overflow-wrap`
+  ([BCD PR 2406](https://github.com/mdn/browser-compat-data/pull/2406)),
   from
-  [Robert Katzki](https://github.com/ro-ka).
-- Update the German localization for `SeeCompatTable`
-  ([KumaScript PR 719](https://github.com/mdn/kumascript/pull/719)),
+  [Quentin Calvez](https://github.com/quentez).
+- Add missing `browserSettings` permission
+  ([BCD PR 2407](https://github.com/mdn/browser-compat-data/pull/2407)),
   from
-  [Metaa](https://github.com/metaa).
-- Replace deprecated `cache_behavior` with `ordered_cache_behavior`
-  ([PR 3](https://github.com/mdn/infra/pull/3)),
-  Change behavior from `*/users/*` to `users/*`
-  ([PR 5](https://github.com/mdn/infra/pull/5)),
+  [Juraj Mäsiar](https://github.com/icl7126).
+- Add data on `window.scroll` for MS Edge
+  ([BCD PR 2433](https://github.com/mdn/browser-compat-data/pull/2433)),
+  from
+  [David Wheatley](https://github.com/davwheat).
+- Update data on `<input type="color">` for Edge
+  ([BCD PR 2434](https://github.com/mdn/browser-compat-data/pull/2434)),
+  from
+  [Thomas Prochazka](https://github.com/zlypher).
+- Add IDEA (IntelliJ, WebStorm, etc.) to `.gitignore`
+  ([PR 2435](https://github.com/mdn/browser-compat-data/pull/2435)),
   and
-  [3 more PRs](https://github.com/mdn/infra/pulls?page=1&utf8=✓&q=is:pr+is:closed+merged:"2018-06-01..2018-06-30"+author:escattone)
+  Add Node.js 8.0.0 support for JavaScript features
+  ([PR 2436](https://github.com/mdn/browser-compat-data/pull/2436)),
+  to BCD from
+  [Peter Mouland](https://github.com/peter-mouland).
+- Update `backdrop-filter`
+  ([BCD PR 2438](https://github.com/mdn/browser-compat-data/pull/2438)),
   from
-  [Ryan Johnson](https://github.com/escattone)
-  (first contributions to infra).
-- MDN infra terraform refactor
-  ([infra PR 4](https://github.com/mdn/infra/pull/4)),
+  [Philip Goto](https://github.com/flipflop97).
+- Add `text-align`’s `<string>` value
+  ([BCD PR 2442](https://github.com/mdn/browser-compat-data/pull/2442)),
   from
-  [Ed Lim](https://github.com/limed).
-- syntaxes.json: `<'border-radius'>` instead of `<border-radius>`
-  ([Data PR 246](https://github.com/mdn/data/pull/246)),
+  [Jakob Krigovsky](https://github.com/sonicdoe).
+- Add `search.get`, `search.search` API data
+  ([BCD PR 2444](https://github.com/mdn/browser-compat-data/pull/2444)),
   from
-  [abaco](https://github.com/abaco).
-- Missing parenthesis at the end of sentence
-  ([learning-area PR 75](https://github.com/mdn/learning-area/pull/75)),
+  [Geoffrey De Belie](https://github.com/Smile4ever).
+- Add compatibility for `window.scrollTo`
+  ([BCD PR 2445](https://github.com/mdn/browser-compat-data/pull/2445)),
   from
-  [Jerson Zúñiga](https://github.com/jzunigacoayla).
-- Removed newline in URL causing match error
-  ([webextensions-examples PR 360](https://github.com/mdn/webextensions-examples/pull/360)),
+  [Mauro Mandracchia](https://github.com/M3kH).
+- Add support for CSS selector `:defined`
+  ([BCD PR 2454](https://github.com/mdn/browser-compat-data/pull/2454)),
   from
-  [Nicholas Hansen](https://github.com/ndhansen).
+  [Estelle Weyl](https://github.com/estelle).
+- Add support for `window.scroll` functions in Safari
+  ([BCD PR 2462](https://github.com/mdn/browser-compat-data/pull/2462)),
+  from
+  [Raz Goldin](https://github.com/zargold).
+- Mark properties defined in ECMA-262 Annex B as deprecated
+  ([BCD PR 2469](https://github.com/mdn/browser-compat-data/pull/2469)),
+  from
+  [TSlivede](https://github.com/TSlivede).
+- Add support for `MediaDevices` API
+  ([BCD PR 2472](https://github.com/mdn/browser-compat-data/pull/2472)),
+  from
+  [Gaurav Mahto](https://github.com/gauravmahto).
+- Update Safari support for CSS property `overscroll-behavior` from unknown to
+  unsupported
+  ([BCD PR 2490](https://github.com/mdn/browser-compat-data/pull/2490)),
+  from
+  [Peter Fernandes](https://github.com/fernap3).
+- Update Safari support for `Navigator.registerProtocolHandler` API from
+  unknown to unsupported
+  ([BCD PR 2499](https://github.com/mdn/browser-compat-data/pull/2499)),
+  from
+  [Lioman](https://github.com/lioman).
+- Move Firefox support for `Server-Timing` header from 59 to 61
+  ([BCD PR 2504](https://github.com/mdn/browser-compat-data/pull/2504)),
+  from
+  [Charles Vazac](https://github.com/cvazac).
+- Fix JS `RegExp` lookbehind assertion description
+  ([BCD PR 2521](https://github.com/mdn/browser-compat-data/pull/2521)),
+  from
+  [Nate Weaver](https://github.com/Wevah).
+- Update IE's support of CSS property `text-align-last`
+  ([BCD PR 2525](https://github.com/mdn/browser-compat-data/pull/2525)),
+  from
+  [Refael Iliaguyev](https://github.com/rellect).
+- Add Node.js 10 support for `promise.finally`
+  ([BCD PR 2529](https://github.com/mdn/browser-compat-data/pull/2529)),
+  from
+  [NKN1396](https://github.com/NKN1396).
+- Add Chrome support for `crisp-edges` as `-webkit-optimize-contrast`
+  ([BCD PR 2531](https://github.com/mdn/browser-compat-data/pull/2531)),
+  from
+  [Eugene Pankov](https://github.com/Eugeny).
+- Fix CSP term `navigate-to` (was `navigation-to`)
+  ([BCD PR 2532](https://github.com/mdn/browser-compat-data/pull/2532)),
+  from
+  [Malvoz](https://github.com/Malvoz).
+- Lowercase `minlength` attribute for `<input type=password>` example
+  ([Interactive Examples PR 1024](https://github.com/mdn/interactive-examples/pull/1024)),
+  from
+  [Timo Tijhof](https://github.com/Krinkle).
+- Change `<select>` examples to use “placeholder label option” pattern
+  ([Interactive Examples PR 1025](https://github.com/mdn/interactive-examples/pull/1025)),
+  from
+  [Taylor Hunt](https://github.com/tigt).
+- Add a new line for markdown bullet list
+  ([Interactive Examples PR 1028](https://github.com/mdn/interactive-examples/pull/1028)),
+  from
+  [Enguerran](https://github.com/enguerran).
+- Add `balance-all` value to `column-fill` example
+  ([Interactive Examples PR 1039](https://github.com/mdn/interactive-examples/pull/1039)),
+  from
+  [Estelle Weyl](https://github.com/estelle).
+- Add `id` as reference for `<label for=>` attribute
+  ([Interactive Examples PR 1045](https://github.com/mdn/interactive-examples/pull/1045)),
+  from
+  [Jon Borglund](https://github.com/Row).
+- Make "Publish and Keep Editing" height the same as others
+  ([Kuma PR 4900](https://github.com/mozilla/kuma/pull/4900)),
+  from
+  [Mihir Karbelkar](https://github.com/Mihir-Karbelkar).
+- Update the URL of Web Speech API
+  ([KumaScript PR 731](https://github.com/mdn/kumascript/pull/731)),
+  from
+  [Kagami Sascha Rosylight](https://github.com/saschanaz).
+- Updating Learn sidebar to add new Layout guides
+  ([PR 736](https://github.com/mdn/kumascript/pull/736)),
+  from
+  [Rachel Andrew](https://github.com/rachelandrew)
+  (first contribution to KumaScript).
+- Move Writing Modes Level 4 to Candidate Recommendation (CR)
+  ([KumaScript PR 744](https://github.com/mdn/kumascript/pull/744)),
+  from
+  [Estelle Weyl](https://github.com/estelle).
+- Reference correct video source video file
+  ([learning-area PR 84](https://github.com/mdn/learning-area/pull/84)),
+  from
+  [Rohit Arondekar](https://github.com/rohit).
+- Fix "farenheit" typo
+  ([learning-area PR 85](https://github.com/mdn/learning-area/pull/85)),
+  from
+  [arda152](https://github.com/arda152).
+- Fix comparison operator (`!==`) in Event Listener
+  ([learning-area PR 86](https://github.com/mdn/learning-area/pull/86)),
+  from
+  [Mourad El garma](https://github.com/aka-yuki).
+- Add folder `javascript/object-basics` for chapter translation
+  ([learning-area-pt-br PR 2](https://github.com/mdn/learning-area-pt-br/pull/2)),
+  from
+  [Felipe Maia](https://github.com/webfelipemaia).
+- Change convolver to disconnect and reconnect to the audio path
+  ([voice-change-o-matic PR 15](https://github.com/mdn/voice-change-o-matic/pull/15)),
+  from
+  [LUCAS GARIBALDI ALVES](https://github.com/lgaribaldi).
+- Use ES2015+ syntax
+  ([web-components-examples PR 8](https://github.com/mdn/web-components-examples/pull/8)),
+  from
+  [Kevin Nagurski](https://github.com/knagurski).
+- Add `{{EventRef}}` to the list of allowed macros
+  ([PR 70](https://github.com/mdn/doc-linter-webextension/pull/70)),
+  from
+  [Eric Shepherd](https://github.com/a2sheppy)
+  (first contribution to Doc Linter WebExtension).
+- Maintain case consistency
+  ([web-speech-api PR 26](https://github.com/mdn/web-speech-api/pull/26)),
+  from
+  [utkarsh-raj](https://github.com/utkarsh-raj).
 
 Other significant PRs:
 
-- Migrate HTMLSelectElement from the wiki
-  ([BCD PR 1406](https://github.com/mdn/browser-compat-data/pull/1406)),
+- Check bugzil.la link format
+  ([BCD PR 2511](https://github.com/mdn/browser-compat-data/pull/2511)),
+  one of
+  [32 Pull Requests](https://github.com/mdn/browser-compat-data/pulls?utf8=%E2%9C%93&q=is%3Apr+is%3Aclosed+merged%3A%222018-07-01..2018-07-31%22+author%3Acaugner)
   from
-  [SphinxKnight](https://github.com/SphinxKnight), one of the
-  [11 PRs](https://github.com/mdn/browser-compat-data/pulls?utf8=✓&q=is%3Apr+is%3Aclosed+merged%3A%222018-06-01..2018-06-30%22+label%3A%22HackOnMDNParis2018+%3Afr%3A%22+)
-  merged from the March
-  [Hack on MDN](https://hacks.mozilla.org/2018/03/hack-on-mdn-building-useful-tools-with-browser-compatibility-data/)
-  event.
-  [27 to go](https://github.com/mdn/browser-compat-data/pulls?utf8=✓&q=is%3Apr+is%3Aopen+label%3A%22HackOnMDNParis2018+%3Afr%3A%22+)!
-- Add compat data for input-password
-  ([BCD PR 2235](https://github.com/mdn/browser-compat-data/pull/2235)),
+  [Claas Augner](https://github.com/caugner).
+- Open interactive example links in a new tab
+  ([Interactive Examples PR 1009](https://github.com/mdn/interactive-examples/pull/1009)),
   from
-  [Mark Boas](https://github.com/maboa), one of many PRs in the epic
-  `<input>` data migration.
-- Use [mdn/infra](https://github.com/mdn/infra) instead of mozmeao/infra
-  ([Kuma PR 4840](https://github.com/mozilla/kuma/pull/4840)),
+  [Stephan Max](https://github.com/stephanmax).
+- Update node 8, dependencies
+  ([Kuma PR 4852](https://github.com/mozilla/kuma/pull/4852)),
   from
-  [Ryan Johnson](https://github.com/escattone).
-- Remove `ok_()` from tests
-  ([Kuma PR 4865](https://github.com/mozilla/kuma/pull/4865)),
-  from
-  [Anthony Maton](https://github.com/MatonAnthony).
-- Fix CurrentGecko macro
-  ([KumaScript PR 720](https://github.com/mdn/kumascript/pull/720)),
-  from
-  [Ryan Johnson](https://github.com/escattone).
+  [me](https://github.com/jwhitlock).
 
-Planned for July
+Planned for August
 ===
-July is the start of the second half of the year, and the team is thinking
-about what can be done by the end of the year. We're planning on finishing
-the compatibility data migration this year, and expanding interactive
-examples to another documentation section.
+More of the same.
 
-<a name="zones-jun-18">Decommission Zones</a>
+<a name="es-jul-18">Upgrade to ElasticSearch 5.6</a>
 ---
-Zones are a wiki engine feature that moves a tree of pages to a different URL,
-and applies additional CSS for those pages. Zones also add
-complexity to every request, require additional testing, and are a frequent
-source of bugs and translation problems. Zones have more enemies than fans on
-the MDN staff.
-
-We've been deprecating zones for a few years. We stopped using new zones as a
-design tool. In 
-[last year's site redesign](https://hacks.mozilla.org/2017/07/the-mdn-redesign-behind-the-scenes/),
-we de-emphasized the style differences between zones and "standard" wiki
-content
-([PR 4348](https://github.com/mozilla/kuma/pull/4348)).
-When migrating MDN to a new data center, we added a
-[redirects framework](https://github.com/pmac/django-redirect-urls) that can
-elegantly handle the custom URLs. We're ready for the final steps.
-
-At the Mozilla All-Hands,
-[Ryan Johnson](https://github.com/escattone) and
-[wbamberg](https://github.com/wbamberg) prepared to remove
-zones. The work took the entire week.  On the engine side, custom URLs need
-redirects to the standard wiki URLs, and some zone styles need to be
-preserved
-([PR 4853](https://github.com/mozilla/kuma/pull/4853)).
-Zone sidebars need to
-be reimplemented as KumaScript sidebars, along with translations
-([PR 711](https://github.com/mdn/kumascript/pull/711)).
-Finally, content needs to be changed, to add the KumaScript sidebars and to use
-standard wiki CSS. While the changes are large, the effect is subtle.
-
-![progressive](
- {{ site.baseurl }}/public/images/kuma/2018-07-progressive.png
- "The Progressive Web Apps documentation, with zones and without zones. For most pages, the visual change will be this subtle.")
-
-After the work week, we reviewed and refined the code, double-checked the
-changes, and clarified the plan. We'll ship the code, update the content,
-and delete zones in July.
-
-<a name="performance-jun-18">Focus on Performance</a>
----
-We're wrapping up the performance audit of MDN in July. We've picked some key
-performance metrics we'd like to track, and the headline metric is how long it
-takes for the interactive example to be ready on CSS, JS, and HTML reference
-pages.
-[Schalk Neethling](https://github.com/schalkneethling) is implementing the
-timing measurements
-([IE PR 967](https://github.com/mdn/interactive-examples/pull/967),
-[Kuma PR 4854](https://github.com/mozilla/kuma/pull/4854), and others),
-using the
-[PerformanceTiming API](https://developer.mozilla.org/en-US/docs/Web/API/PerformanceTiming)
-so the measurements will be available in browser tools. We also track timing
-in Google Analytics, to get real-user metrics from MDN's global audience,
-unless the user has requested that
-[we don't track them](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/DNT).
-
-We've found several performance bottlenecks, and we're prioritizing them to pick
-the quick wins and the high-impact changes. We'll ship improvements in July
-and beyond.
+We're on ES 2.4, but need to update to ES 5.6 in August.
