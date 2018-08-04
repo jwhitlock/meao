@@ -1,6 +1,6 @@
 #!/bin/bash -ex
 
-export JEKYLL_VERSION=3.5
+export JEKYLL_VERSION=3.8
 export JEKYLL_DEBUG=1
 export JEKYLL_UID=$(id -u)
 CMD="jekyll serve --watch --drafts"
