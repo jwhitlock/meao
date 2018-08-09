@@ -29,35 +29,36 @@ Here's the plan for August:
 We moved MDN Web Docs to a CDN in
 [April 2018](https://hacks.mozilla.org/2018/05/cdn-bcd-and-svg-mdn-changelog-for-april-2018/),
 and saw a 16% improvement in page load times. We shipped with 5 minute
-expiration times for MDN pages, which is short, and means that most visitors
-(80%) are getting an uncached page. We did this because there's a potentially
-large amount of work to invalidate the cache when a page changes, and because
-MDN Web Docs is a wiki, we can't predict when a page will change.  300 seconds
-was a compromise between some caching, and how long an author would need to
-wait for a changed page to be published to all visitors.
+expiration times for MDN pages, so that the CDN will request a fresh
+copy after a short time. MDN Web Docs is a wiki, and we can't predict
+when a page will change. 300 seconds was a compromise between some caching for
+our most popular pages, and how long an author would need to wait for a changed
+page to be published to all visitors. 80% of visitors are getting an
+uncached page.
 
-Before committing to the cache invalidation work, we wanted to estimate
-the expected performance benefits. From July 9 to July 15, we bumped the
-timeout from 5 minutes to 48 hours
-([Ryan Johnson](https://github.com/escattone) in
-[Kuma PR 4876](https://github.com/mozilla/kuma/pull/4876)),
-and waited for the data.
+Longer cache expirations would require cache invalidation,
+[one of the two hard things in computer science](https://twitter.com/codinghorror/status/506010907021828096).
+Before committing to the work, we wanted to estimate the expected performance
+benefits. From July 9 to 15,
+[Ryan Johnson](https://github.com/escattone)
+bumped the timeout from 5 minutes to 48 hours
+([PR 4876](https://github.com/mozilla/kuma/pull/4876)), and we gathered the
+performance data.
 
-Average page load time decreased 3% over the previous week, a small improvement
-but much less than expected, and probably not significant. The results for
-different countries was mixed, some slightly improved, and some slightly worse.
-The outlier was China, where average page load time increased 20%, a
-significant decrease in performance.
+Average page load time decreased 3% over the previous week, a small and not
+significant improvement. The results for different countries was mixed, some
+slightly improved, and some slightly worse.  The outlier was China, where
+average page load time increased 22%, a significant _decrease_ in performance.
 
 ![analytics-china](
  {{ site.baseurl }}/public/images/kuma/2018-08-analytics-china.png
  "Page load time in China was worse during the experiment, 60% worse on July 13")
 
 The page load time varied on weekdays versus weekends as well (positive
-percents are shorter, improved page load times):
+percents are shorter page load times, better for users):
 
 | Country | Page Load Decrease, Weekday | Page Load Decrease, Weekend |
-| ------- | --------------------------- | --------------------------- |
+| ------- | --------------------------: | --------------------------: |
 | All     |   1% |  -2% |
 | USA     |   3% |   3% |
 | India   |   2% |  -7% |
@@ -70,39 +71,39 @@ percents are shorter, improved page load times):
 | Brazil  |   2% |  -2% |
 | Ukraine |   6% |   1% |
 
-This is a successful experiment - we got an unexpected result, with minimal
+This is a successful experiment. We got an unexpected result, with minimal
 work to get those results.  At the same time, we're curious why the longer CDN
 expiration had little effect for most users, and a negative effect for China.
 We have some theories.
 
 CloudFront is Amazon's CDN, and the easiest option to get approved (a small
 price increase on an existing bill). It uses Amazon's data centers and
-networks. A cache miss should add only add a little time to a request, since
-the CDN can use Amazon's network to contact the backing service. At the same
-time, a cache hit wouldn't be much faster, since our server processing is
-fairly optimized. The primary benefit is reducing server load, and we did see
-a 25% - 50% reduction in requests made to the servers, especially during peak
-hours.
+networks. A cache miss adds 50-100 ms to a request, since the CDN can use
+Amazon's network to contact the backing service, and we've optimized MDN for
+quickly serving wiki pages.  The primary benefit is reducing server load, and we
+did see a 25% - 50% reduction in requests made to the servers, especially
+during peak hours.
 
 We're currently directing CloudFront to cache pages, but telling downstream
-proxies and browsers to not cache the pages. This is because a wiki page can
-change after someone edits it, and we're still thinking through a content
-invalidation policy.  It may be that downstream caches have a bigger impact
-than expected on page load, and we can try that in the next experiment.
+proxies and browsers not to cache the pages. A wiki page can change after
+someone edits it, and we wanted to avoid several layers of caches holding on to
+stale copies.  Downstream caches may have a bigger impact than we expect on
+page load, and we can try allowing caching in the next experiment.
 
-China has country-wide policies to monitor and control internet traffic. It
-appears that longer caching times result in slower processing. We saw a page
-load improvement moving developer.mozilla.org to CloudFront, but it looks like
-most of the benefit was removing a second domain lookup for assets. A future
-experiment may skip CloudFront for traffic in China.
+China has country-wide policies to monitor and control internet traffic. We
+don't know the details, but longer caching times result in slower processing.
+We saw an improvement in China moving developer.mozilla.org to CloudFront,
+lowering the average page load time by 30%.  It is possible that most of the
+benefit was due to removing a second domain lookup for assets. A future
+experiment may skip CloudFront for traffic from China.
 
-There's a difference between weekday and weekend traffic that is more larger
-in some countries, like China and Japan, than others. Our guess is that
-weekday traffic is dominated by developers using MDN for work, weekend traffic
-by developers for hobbies and learning, and there are differences in the
-devices and connections used in each situation.
+There's a significant difference between weekday and weekend traffic in some
+countries, like China and Japan. Our guess is that weekday traffic is dominated
+by developers using MDN for work, weekend traffic by developers using MDN for
+hobbies and learning. We also suspect there are differences between the
+capabilities of work week devices and home devices.
 
-Finally, the results may be a limitation of CloudFront, and we may see
+Finally, the results may be a limitation of CloudFront, and we would see
 different results with a different CDN provider.
 
 We'll look elsewhere for ways to speed up our page load times. For example,
@@ -115,17 +116,18 @@ for reducing page load time, to meet our new performance goals.
 
 <a name="zones-jul-18">Decommissioned zones</a>
 ---
-[Ryan Johnson](https://github.com/escattone) removed zone on July 24,
+[Ryan Johnson](https://github.com/escattone) removed zones on July 24,
 merging [PR 4853](https://github.com/mozilla/kuma/pull/4853).
 From a user's perspective, there are a few changes.
 
-Custom zone URLs, like https://developer.mozilla.org/en-US/Firefox/Releases/60,
-are now at standard wiki URLs, like
-https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Releases/60. There
-are redirects to the new URLs.
+Custom zone URLs, like
+<https://developer.mozilla.org/en-US/Firefox/Releases/61>,
+are now at standard wiki URLs under `/docs/`, like
+<https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Releases/61>. There
+are redirects to the new URLs, so old links should continue working.
 
 Custom zone styling is removed, and zone pages now look like other wiki pages.
-This is subtle on most pages, such as loosing an icon next to the title. Other
+This is subtle on most pages, such as removing an icon next to the title. Other
 pages required a re-write, such as
 [The History of MDN](https://developer.mozilla.org/en-US/docs/MDN_at_ten/History_of_MDN).
 
@@ -136,27 +138,27 @@ pages required a re-write, such as
 Zone sidebars were converted to KumaScript sidebars, and added to each page in
 the zone, through the heroic efforts of
 [wbamberg](https://github.com/wbamberg)
-([PR 711](https://github.com/mdn/kumascript/pull/711), others).
+([PR 711](https://github.com/mdn/kumascript/pull/711) and a few others).
 
 About 2600 lines of code were removed, about 10% of the codebase. The wiki
-code is now simpler, less error prone, and safer to maintain.
+code is now simpler, less error prone, and safer to update.
 
 <a name="bcd-jul-18">Converted compatibility data</a>
 ---
-In July of last year, the BCD project hit the milestone of over 1000 MDN pages
-using the new compatibility data, with about 4900 to convert. This month, there
-are less than 850 pages left to convert, and over 5000 MDN pages are using the
-new data. The steady work of the BCD team has made a huge impact on MDN and the
-community.
+In July of last year, the Browser Compatibility Data (BCD) project hit the
+milestone of over 1000 MDN pages using the new compatibility data, with about
+4900 to convert. This month, there are less than 850 pages left to convert, and
+over 5000 MDN pages are using the new data. The steady work of the BCD team has
+made a huge impact on MDN and the community.
 
 Visual Studio Code
-[improved the accuracy of their Browser Compatibility Data](https://code.visualstudio.com/updates/v1_25#_improved-accuracy-of-browser-compatibility-data)
+[improved the accuracy of their data](https://code.visualstudio.com/updates/v1_25#_improved-accuracy-of-browser-compatibility-data)
 by adopting the BCD project in the June 2018 release. This was proposed by
 [Pine](https://github.com/octref) in
 [vscode-css-languageservice issue #102](https://github.com/Microsoft/vscode-css-languageservice/issues/102)
 and implemented in
 [PR #105](https://github.com/Microsoft/vscode-css-languageservice/pull/105),
-with feedback from BCD and mdn/data regular
+with feedback from BCD and mdn/data contributor
 [Connor Shea](https://github.com/connorshea).
 
 ![vscode](
@@ -170,14 +172,14 @@ Node.js versions numbers
 and others). At first, browser-style version numbers were used, such as
 "4", "6", and "8", but the Node.js community requested "4.0.0",
 "6.0.0", and "8.0.0", to more closely reflect how they think of
-release numbers. This was a wide ranging change that unstuck several
+release numbers. This affected lots of files and unstuck several
 Node.js pull requests.
 
 [Florian Scholz](https://github.com/Elchi3) went on vacation, and
 [Daniel D. Beck](https://github.com/ddbeck) took the lead on project
-maintenance, including shipping the npm package
-(documented in
-[PR 2480](https://github.com/mdn/browser-compat-data/pull/2480)).
+maintenance, including shipping the npm package,
+now documented via
+[PR 2480](https://github.com/mdn/browser-compat-data/pull/2480).
 Most of the
 [PRs from the Paris Hack on MDN event](https://github.com/mdn/browser-compat-data/pulls?utf8=%E2%9C%93&q=is%3Apr+label%3A%22HackOnMDNParis2018+%3Afr%3A%22+)
 are now merged or closed, and the project is down to 120 open PRs,
@@ -388,7 +390,7 @@ There were 307 PRs merged in July:
   ([web-components-examples PR 8](https://github.com/mdn/web-components-examples/pull/8)),
   from
   [Kevin Nagurski](https://github.com/knagurski).
-- Add `{{EventRef}}` to the list of allowed macros
+- Add `EventRef` to the list of allowed macros
   ([PR 70](https://github.com/mdn/doc-linter-webextension/pull/70)),
   from
   [Eric Shepherd](https://github.com/a2sheppy)
@@ -418,8 +420,8 @@ Other significant PRs:
 Planned for August
 ===
 In August, we'll continue working on new and improved interactive examples,
-converting compatibility data, switching to Python 3, and other long-term
-projects.
+converting compatibility data (aiming for less than 50 open PRs), switching to
+Python 3, improving performance, and other long-term projects.
 
 <a name="es-jul-18">Upgrade to Elasticsearch 5.6</a>
 ---
@@ -431,4 +433,5 @@ grace period to
 [update from Django 1.8 to 1.11](https://hacks.mozilla.org/2018/07/mdn-changelog-for-june-2018/#shipped-django-111).
 In August, we'll update our client libraries and code so we can update to
 Elasticsearch 5.6, the next major release. We don't expect many user-visible
-changes with the new server.
+changes with the new server, but we also don't plan to lose site search due to
+missing the deadline.
