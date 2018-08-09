@@ -22,34 +22,124 @@ that support
 
 Here's the plan for August:
 
-- [Upgrade to ElasticSearch 5.6](#es-jul-18)
+- [Upgrade to Elasticsearch 5.6](#es-jul-18)
 
-<a name="item2-jul-18">Experimented with the CDN</a>
+<a name="item2-jul-18">Experimented with longer CDN expirations</a>
 ---
-- Change cache TTL from 5min to 48hr
-  ([Kuma PR 4876](https://github.com/mozilla/kuma/pull/4876)),
-  from
-  [Ryan Johnson](https://github.com/escattone).
+We moved MDN Web Docs to a CDN in
+[April 2018](https://hacks.mozilla.org/2018/05/cdn-bcd-and-svg-mdn-changelog-for-april-2018/),
+and saw a 16% improvement in page load times. We shipped with 5 minute
+expiration times for MDN pages, which is short, and means that most visitors
+(80%) are getting an uncached page. We did this because there's a potentially
+large amount of work to invalidate the cache when a page changes, and because
+MDN Web Docs is a wiki, we can't predict when a page will change.  300 seconds
+was a compromise between some caching, and how long an author would need to
+wait for a changed page to be published to all visitors.
 
-Other performance stuff:
+Before committing to the cache invalidation work, we wanted to estimate
+the expected performance benefits. From July 9 to July 15, we bumped the
+timeout from 5 minutes to 48 hours
+([Ryan Johnson](https://github.com/escattone) in
+[Kuma PR 4876](https://github.com/mozilla/kuma/pull/4876)),
+and waited for the data.
 
-- Inline dnt-helper
-  ([Kuma PR 4881](https://github.com/mozilla/kuma/pull/4881)),
-  from
-  [Schalk Neethling](https://github.com/schalkneethling).
-- Add Jinja helper for SVG
-  ([Kuma PR 4860](https://github.com/mozilla/kuma/pull/4860)),
-  from
-  [Schalk Neethling](https://github.com/schalkneethling).
+Average page load time decreased 3% over the previous week, a small improvement
+but much less than expected, and probably not significant. The results for
+different countries was mixed, some slightly improved, and some slightly worse.
+The outlier was China, where average page load time increased 20%, a
+significant decrease in performance.
+
+![analytics-china](
+ {{ site.baseurl }}/public/images/kuma/2018-08-analytics-china.png
+ "Page load time in China was worse during the experiment, 60% worse on July 13")
+
+The page load time varied on weekdays versus weekends as well (positive
+percents are shorter, improved page load times):
+
+| Country | Page Load Decrease, Weekday | Page Load Decrease, Weekend |
+| ------- | --------------------------- | --------------------------- |
+| All     |   1% |  -2% |
+| USA     |   3% |   3% |
+| India   |   2% |  -7% |
+| China   | -22% | -35% |
+| Japan   |   0% |  10% |
+| France  |  -1% |  -5% |
+| Germany |   3% |   3% |
+| UK      |   2% |   2% |
+| Russia  |   0% |   2% |
+| Brazil  |   2% |  -2% |
+| Ukraine |   6% |   1% |
+
+This is a successful experiment - we got an unexpected result, with minimal
+work to get those results.  At the same time, we're curious why the longer CDN
+expiration had little effect for most users, and a negative effect for China.
+We have some theories.
+
+CloudFront is Amazon's CDN, and the easiest option to get approved (a small
+price increase on an existing bill). It uses Amazon's data centers and
+networks. A cache miss should add only add a little time to a request, since
+the CDN can use Amazon's network to contact the backing service. At the same
+time, a cache hit wouldn't be much faster, since our server processing is
+fairly optimized. The primary benefit is reducing server load, and we did see
+a 25% - 50% reduction in requests made to the servers, especially during peak
+hours.
+
+We're currently directing CloudFront to cache pages, but telling downstream
+proxies and browsers to not cache the pages. This is because a wiki page can
+change after someone edits it, and we're still thinking through a content
+invalidation policy.  It may be that downstream caches have a bigger impact
+than expected on page load, and we can try that in the next experiment.
+
+China has country-wide policies to monitor and control internet traffic. It
+appears that longer caching times result in slower processing. We saw a page
+load improvement moving developer.mozilla.org to CloudFront, but it looks like
+most of the benefit was removing a second domain lookup for assets. A future
+experiment may skip CloudFront for traffic in China.
+
+There's a difference between weekday and weekend traffic that is more larger
+in some countries, like China and Japan, than others. Our guess is that
+weekday traffic is dominated by developers using MDN for work, weekend traffic
+by developers for hobbies and learning, and there are differences in the
+devices and connections used in each situation.
+
+Finally, the results may be a limitation of CloudFront, and we may see
+different results with a different CDN provider.
+
+We'll look elsewhere for ways to speed up our page load times. For example,
+[Schalk Neethling](https://github.com/schalkneethling) is working to replace
+icons via webfonts with SVG icons
+([PR 4860](https://github.com/mozilla/kuma/pull/4860)), and inlining short
+JavaScript files rather than making a request
+([PR 4881](https://github.com/mozilla/kuma/pull/4881)). We have further plans
+for reducing page load time, to meet our new performance goals.
 
 <a name="zones-jul-18">Decommissioned zones</a>
 ---
-We disabled zones on TKTK. They are gone. There is a little more to do.
+[Ryan Johnson](https://github.com/escattone) removed zone on July 24,
+merging [PR 4853](https://github.com/mozilla/kuma/pull/4853).
+From a user's perspective, there are a few changes.
 
-- Death of zones
-  ([Kuma PR 4853](https://github.com/mozilla/kuma/pull/4853)),
-  from
-  [Ryan Johnson](https://github.com/escattone).
+Custom zone URLs, like https://developer.mozilla.org/en-US/Firefox/Releases/60,
+are now at standard wiki URLs, like
+https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Releases/60. There
+are redirects to the new URLs.
+
+Custom zone styling is removed, and zone pages now look like other wiki pages.
+This is subtle on most pages, such as loosing an icon next to the title. Other
+pages required a re-write, such as
+[The History of MDN](https://developer.mozilla.org/en-US/docs/MDN_at_ten/History_of_MDN).
+
+![analytics-china](
+ {{ site.baseurl }}/public/images/kuma/2018-07-progressive.png
+ "An example of removing the zone styling")
+
+Zone sidebars were converted to KumaScript sidebars, and added to each page in
+the zone, through the heroic efforts of
+[wbamberg](https://github.com/wbamberg)
+([PR 711](https://github.com/mdn/kumascript/pull/711), others).
+
+About 2600 lines of code were removed, about 10% of the codebase. The wiki
+code is now simpler, less error prone, and safer to maintain.
 
 <a name="bcd-jul-18">Converted compatibility data</a>
 ---
@@ -327,8 +417,18 @@ Other significant PRs:
 
 Planned for August
 ===
-More of the same.
+In August, we'll continue working on new and improved interactive examples,
+converting compatibility data, switching to Python 3, and other long-term
+projects.
 
-<a name="es-jul-18">Upgrade to ElasticSearch 5.6</a>
+<a name="es-jul-18">Upgrade to Elasticsearch 5.6</a>
 ---
-We're on ES 2.4, but need to update to ES 5.6 in August.
+Elasticsearch powers our little-loved site search, and we're using version 2.4
+in production. This version went
+[out of support](https://www.elastic.co/support/eol)
+in February 2018, but our provider gave us until August to update. We used that
+grace period to
+[update from Django 1.8 to 1.11](https://hacks.mozilla.org/2018/07/mdn-changelog-for-june-2018/#shipped-django-111).
+In August, we'll update our client libraries and code so we can update to
+Elasticsearch 5.6, the next major release. We don't expect many user-visible
+changes with the new server.
