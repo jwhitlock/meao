@@ -46,9 +46,6 @@ title: MDN Changelog for %(month)s %(year)d
 author: %(post_author)s
 ---
 
-Done in %(month)s
-===
-
 Here's what happened in %(month)s to the
 [code, data, and tools](https://github.com/mdn/)
 that support
@@ -68,6 +65,9 @@ Here's the plan for %(next_month)s:
 - [Plan 2](#plan2-%(month_id_suffix)s)
 - [Plan 3](#plan3-%(month_id_suffix)s)
 
+Done in %(month)s
+===
+
 <a name="item1-%(month_id_suffix)s">Item 1</a>
 ---
 Here's the first item, including lots of images.
@@ -80,19 +80,20 @@ The second item is also important.
 ---
 Everyone stopped reading.
 
-<a name="tweaks-%(month_id_suffix)s">Shipped Tweaks and Fixes</a>
+<a name="tweaks-%(month_id_suffix)s">Shipped tweaks and fixes</a>
 ---
 There were %(total)s PRs merged in %(month)s:
 
 %(pr_counts_text)s
 
-%(prs_from_new_users)s of these were from first-time contributors:
+This includes some important changes and fixes:
+
+%(pr_other_details)s
+
+%(prs_from_new_users)s pull requests were from first-time contributors:
 
 %(pr_first_details)s
 
-Other significant PRs:
-
-%(pr_other_details)s
 
 Planned for %(next_month)s
 ===
