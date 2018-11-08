@@ -93,8 +93,8 @@ experiments to learn more about the components of page load time.
 switched production traffic from the Marketing to the IT servers on October 29th.
 The site was placed in read-only mode, so all the content was available during
 the transition. There were some small hiccups, mostly around running out of API
-budge for [Amazon's Elastic File System](https://aws.amazon.com/efs/) (EFS),
-but we handled the issues within in the maintenance window.
+budget for [Amazon's Elastic File System](https://aws.amazon.com/efs/) (EFS),
+but we handled the issues within the maintenance window.
 
 ![maisenbacher](
  {{ site.baseurl }}/public/images/kuma/2018-11-maisenbacher.jpg
@@ -179,6 +179,10 @@ This includes some important changes and fixes:
   one of [several audio demos](https://github.com/mdn/webaudio-examples/pulls?page=1&utf8=✓&q=is:pr+is:closed+merged:"2018-10-01..2018-10-31")
   from
   [Ruth John](https://github.com/Rumyra).
+
+![sequencer](
+ {{ site.baseurl }}/public/images/kuma/2018-11-sequencer.png
+ "A step sequencer demonstrating web audio APIs.")
 
 78 pull requests were from first-time contributors:
 
